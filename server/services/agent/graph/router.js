@@ -1,7 +1,7 @@
-import { getModel } from "../config/llmModels"
+import { getModel } from "../config/llmModels.js"
 
 export const router = async (state) => {
-    const llm = getModel("router")
+    const llm = await getModel("router")
     const prompt = `You are a agent router 
     Available agents:
     -chat
@@ -50,6 +50,8 @@ export const router = async (state) => {
 
     return {
         ...state,
-        agent:response
+        agent:response.content
+                    .trim()
+                    .toLowerCase()
     }
 }
