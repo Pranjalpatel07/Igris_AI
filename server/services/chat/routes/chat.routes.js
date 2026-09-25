@@ -8,3 +8,5 @@ router.get("/get-conversations",getConversations)
 router.post("/update-conversations",updateConversation)
 router.post("/save-message",saveMessage)
 router.get("/get-message/:conversationId",getMessages)
+
+export default router
