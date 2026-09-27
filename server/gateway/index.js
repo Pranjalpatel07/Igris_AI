@@ -1,5 +1,5 @@
+import "dotenv/config";
 import express from "express";
-import dotenv from "dotenv"
 import proxy from "express-http-proxy";
 import cors from 'cors'
 import cookieParser from "cookie-parser";
@@ -8,7 +8,6 @@ import protect from './middleware/auth.middleware.js'
 import { proxyWithHeader } from "./utils/proxyWithHeader.js";
 import morgan from 'morgan'
 
-dotenv.config()
 const app = express()
 
 const port = process.env.PORT
@@ -23,10 +22,10 @@ app.use(morgan("dev"))
 
 app.use("/api/auth",proxy(process.env.AUTH_SERVICE))
 app.use("/api/chat",protect,proxyWithHeader(process.env.CHAT_SERVICE))
-app.use("/api/agent",protect,proxy(process.env.AGENT_SERVICE))
+app.use("/api/agent",protect,proxyWithHeader(process.env.AGENT_SERVICE))
 app.get("/api/me",protect,getCurrentUser)
 
 
 app.listen(port,() => {
-    console.log("GATEWAY is listening on port 8000")
+    console.log(`GATEWAY is listening on port ${port}`)
 })

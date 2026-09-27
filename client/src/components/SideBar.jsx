@@ -1,4 +1,4 @@
-import React, { useState ,useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Coins, LogOut, MessageSquare, PanelLeftIcon, PanelRightIcon, PenSquare, Plus, User } from "lucide-react"
 import {getConversations} from '../features/getConversation'
 import {createConversation} from '../features/createConversation'
@@ -13,17 +13,21 @@ function SideBar() {
     const [imageError,setImageError] = useState(false)
     const {conversations,selectedConversation} = useSelector(state => state.conversation)
     const {userData} = useSelector(state => state.user)
+    const validConversations = conversations.filter(Boolean)
     useEffect(()=>{
         const getConv = async () => {
             const data = await getConversations()
             dispatch(setConversation(data))
         }
         getConv()
-    },[userData?._id])
+    },[dispatch, userData?._id])
 
     const handleCreateConversation = async () => {
         const data = await createConversation()
+        if (!data?._id) return
+
         dispatch(addConversation(data))
+        dispatch(setSelectConversation(data))
     }
 
 if(collapsed){
@@ -38,10 +42,11 @@ if(collapsed){
             </button>
 
             <div className='flex-1 overflow-y-auto px-2.5 pb-2 scrollbar-none [&::-webkit-scrollbar]:hidden pt-5'>
-                {conversations.map((conv,i)=>{
-                    const isActive=selectedConversation._id == conv?._id
+                {validConversations.map((conv)=>{
+                    const isActive=selectedConversation?._id === conv._id
                     return(
                         <div
+                        key={conv._id}
                         onClick={()=>dispatch(setSelectConversation(conv))}
                          className={`flex items-center gap-2.5 cursor-pointer mb-0.5 px-3 py-2.5 rounded-[10px]border transition-colors duration-150 
                             ${isActive ? "bg-indigo-500/10 border-indigo-500/18" : "bg-transparent border-transparent"}`}>
@@ -102,7 +107,7 @@ if(collapsed){
 
             </div>
 
-            {conversations.length == 0 ? 
+            {validConversations.length == 0 ? 
             
                 <div className='px-5 pt-4 pb-1.5 text-[10.5px] font-semibold uppercase tracking-widest text-slate-600'>
                     No Recent Conversations
@@ -116,11 +121,12 @@ if(collapsed){
             }
 
             <div className='flex-1 overflow-y-auto px-2.5 pb-2 scrollbar-none [&::-webkit-scrollbar]:hidden'>
-                {conversations.map((conv)=>{
-                    const isActive=selectedConversation?._id == conv?._id
+                {validConversations.map((conv)=>{
+                    const isActive=selectedConversation?._id === conv._id
                     return(
                         <div
-                        onClick={()=>dispatch(setSelectConversation(conv._id))}
+                        key={conv._id}
+                        onClick={()=>dispatch(setSelectConversation(conv))}
                          className={`flex items-center gap-2.5 cursor-pointer mb-0.5 px-3 py-2.5 rounded-[10px]border transition-colors duration-150 
                             ${isActive ? "bg-indigo-500/10 border-indigo-500/18" : "bg-transparent border-transparent"}`}>
                                 <div className={`flex items-center justify-center shrink-0 w-7 h-7 rounded-lg transition-colors duration-150 
