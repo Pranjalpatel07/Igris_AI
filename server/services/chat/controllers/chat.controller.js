@@ -94,7 +94,7 @@ export const getMessages = async (req,res) => {
         if (!conversation) return res.status(404).json({message:"Conversation not found"})
         const messages = await Message.find({
             conversationId
-        }).sort({createdAt : -1})
+        }).sort({createdAt : 1})
         return res.status(200).json(messages)
     } catch (error) {
         console.error("get messages error",error)

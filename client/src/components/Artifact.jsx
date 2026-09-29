@@ -1,11 +1,5 @@
-import React from 'react'
-
 function Artifact() {
-  return (
-    <div className=''>
-      
-    </div>
-  )
+  return <div className='' />
 }
 
 export default Artifact

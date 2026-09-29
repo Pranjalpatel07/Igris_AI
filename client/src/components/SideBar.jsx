@@ -37,7 +37,7 @@ if(collapsed){
                 <PanelRightIcon/>
             </button>
 
-            <button className='flex items-center justify-center w-9 h-9 rounded-xl text-slate-500 hover:text-slate-200 hover:bg-white/5 transition-colors duration-150 bg-transparent border-none cursor-pointer'>
+            <button className='flex items-center justify-center w-9 h-9 rounded-xl text-slate-500 hover:text-slate-200 hover:bg-white/5 transition-colors duration-150 bg-transparent border-none cursor-pointer' onClick={()=>dispatch(setSelectConversation(null))} >
                 <Plus size={17}/>
             </button>
 
@@ -48,15 +48,12 @@ if(collapsed){
                         <div
                         key={conv._id}
                         onClick={()=>dispatch(setSelectConversation(conv))}
-                         className={`flex items-center gap-2.5 cursor-pointer mb-0.5 px-3 py-2.5 rounded-[10px]border transition-colors duration-150 
+                         className={`flex items-center gap-2.5 cursor-pointer mb-0.5 px-3 py-2.5 rounded-[10px] border transition-colors duration-150 
                             ${isActive ? "bg-indigo-500/10 border-indigo-500/18" : "bg-transparent border-transparent"}`}>
                                 <div className={`flex items-center justify-center shrink-0 w-5 h-5 rounded-lg transition-colors duration-150 
                                     ${isActive ? "bg-indigo-500/15 text-indigo-400" : "bg-white/5 text-slate-500"}`}>
                                     <MessageSquare size={13}/>
                                 </div>
-                                
-                               
-
                             </div>
                     )
                 })}
@@ -90,35 +87,32 @@ if(collapsed){
 
                 <span className='text-[16px] font-semibold text-slate-100 tracking-tight flex-1'>
                     IgrisAI
-                </span>()
+                </span>
 
                 <span className='text-[10px] font-medium text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-full tracking-wide'>free</span>
 
-                <button className='flex items-center justify-center w-7 h-7 rounded-lg text-slate-500 hover:text-slate-200 hover:bg-white/5 transition-colors duration-150 bg-transparent border-none cursor-poniter' onClick={handleCreateConversation}>
+                <button className='flex items-center justify-center w-7 h-7 rounded-lg text-slate-500 hover:text-slate-200 hover:bg-white/5 transition-colors duration-150 bg-transparent border-none cursor-pointer' onClick={() => {dispatch(setSelectConversation(null))}}>
                     <PenSquare size={14}/>
                 </button>
             </div>
 
             <div className='px-4 pt-4 pb-1'>
-                <button className='w-full flex items-center justify-center gap-2 text-sm font-medium text-white bg-linear-to-br from bg-indigo-500 to via-violet-700 rounded-xl py-2.5 border-none cursor-pointer hover:opacity-90 transition-opacity duration-150' onClick={handleCreateConversation}>
+                <button className='w-full flex items-center justify-center gap-2 text-sm font-medium text-white bg-linear-to-r from-indigo-500 via-violet-700 to-violet-600 rounded-xl py-2.5 border-none cursor-pointer hover:opacity-90 transition-opacity duration-150' onClick={()=> {dispatch(setSelectConversation(null))}}>
                     <Plus size={15}/>
                     New Chat
                 </button>
 
             </div>
 
-            {validConversations.length == 0 ? 
-            
+            {validConversations.length === 0 ? (
                 <div className='px-5 pt-4 pb-1.5 text-[10.5px] font-semibold uppercase tracking-widest text-slate-600'>
                     No Recent Conversations
                 </div>
-                :
-                (
-                    <div className='px-5 pt-4 pb-1.5 text-[10.5px] font-semibold uppercase tracking-widest text-slate-600'>
-                        Recents
-                    </div>
-                )   
-            }
+            ) : (
+                <div className='px-5 pt-4 pb-1.5 text-[10.5px] font-semibold uppercase tracking-widest text-slate-600'>
+                    Recents
+                </div>
+            )}
 
             <div className='flex-1 overflow-y-auto px-2.5 pb-2 scrollbar-none [&::-webkit-scrollbar]:hidden'>
                 {validConversations.map((conv)=>{
@@ -127,7 +121,7 @@ if(collapsed){
                         <div
                         key={conv._id}
                         onClick={()=>dispatch(setSelectConversation(conv))}
-                         className={`flex items-center gap-2.5 cursor-pointer mb-0.5 px-3 py-2.5 rounded-[10px]border transition-colors duration-150 
+                         className={`flex items-center gap-2.5 cursor-pointer mb-0.5 px-3 py-2.5 rounded-[10px] border transition-colors duration-150 
                             ${isActive ? "bg-indigo-500/10 border-indigo-500/18" : "bg-transparent border-transparent"}`}>
                                 <div className={`flex items-center justify-center shrink-0 w-7 h-7 rounded-lg transition-colors duration-150 
                                     ${isActive ? "bg-indigo-500/15 text-indigo-400" : "bg-white/5 text-slate-500"}`}>

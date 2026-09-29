@@ -1,6 +1,6 @@
 import axios from "axios"
 import {graph} from "../graph/graph.js"
-
+import {addMessage} from '../config/Memory.js'
 export const agent = async (req,res) => {
     try {
         const {prompt , conversationId} = req.body
@@ -10,6 +10,7 @@ export const agent = async (req,res) => {
             return res.status(400).json({message:"A prompt and conversation id are required"})
         }
 
+        
         await axios.post(`${process.env.CHAT_SERVICE}/save-message`,{
             conversationId,
             role:"user",
@@ -17,12 +18,14 @@ export const agent = async (req,res) => {
         },{
             headers:{"x-user-id":userId}
         })
-
+        
         const result = await graph.invoke({
             prompt ,
-            conversationId
+            conversationId,
+            userId
         })
         const response = result.aiResponse
+        
         if (typeof response !== "string" || !response.trim()) {
             throw new Error("Agent did not produce a response")
         }
@@ -34,6 +37,7 @@ export const agent = async (req,res) => {
         },{
             headers:{"x-user-id":userId}
         })
+        await addMessage(conversationId,"assistant",response)
         
         return res.status(200).json(response)
     } catch (error) {

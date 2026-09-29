@@ -1,14 +1,14 @@
-import redis from "../../../shared/redis.js"
-import {getMessages} from "../"
+import redis from "../../../shared/redis/redis.js"
+import {getConversationMessages} from "../utils/getConversationMessages.js"
 
-export const getMemory = async (conversationId) => {
+export const getMemory = async (conversationId, userId) => {
     const key =`messages-${conversationId}`
     const cached = await redis.get(key)
     if(cached){
         return JSON.parse(cached)
     }
 
-    const messages = await getMessages(conversationId)
+    const messages = await getConversationMessages(conversationId, userId)
     await redis.set(key,JSON.stringify(messages),"EX", 24*60*60)
 
     return messages
@@ -24,4 +24,5 @@ export const addMessage = async (conversationId,role,content) => {
     if(messages.length > 20){
         messages.shift()
     }
+    await redis.set(key,JSON.stringify(messages),"EX", 24*60*60)
 }
