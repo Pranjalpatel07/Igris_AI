@@ -10,40 +10,47 @@ import { updateConversation } from '../features/updateConversation';
 function ChatInput() {
   const [value,setValue] = useState("");
   const [selectedAgent,setSelectedAgent] = useState("Auto")
+  const [isSending,setIsSending] = useState(false)
   const {selectedConversation} = useSelector(state => state.conversation)
   const dispatch = useDispatch()
 
   const handleSendMessage = async () => {
     let conversation = selectedConversation
-    if (!value.trim()) {
+    const prompt = value.trim()
+    if (!prompt || isSending) {
       console.warn("Message not sent: enter a prompt first.")
       return
     }
-    if (!conversation) {
-      const conv = await createConversation()
-      dispatch(setSelectConversation(conv))
-      dispatch(addConversation(conv))
-      conversation=conv
-    }
-    if(conversation.title == "New Chat"){
-      const title = value.trim()
-      dispatch(setConvTitle({conversationId:conversation._id,title}))
-      const updatedConversation = await updateConversation({id:conversation._id,title})
-      conversation = updatedConversation || {...conversation,title}
-    }
+    setIsSending(true)
+    try {
+      if (!conversation) {
+        const conv = await createConversation()
+        if (!conv?._id) return
+        dispatch(setSelectConversation(conv))
+        dispatch(addConversation(conv))
+        conversation=conv
+      }
+      if(conversation.title === "New Chat"){
+        const title = prompt
+        dispatch(setConvTitle({conversationId:conversation._id,title}))
+        const updatedConversation = await updateConversation({id:conversation._id,title})
+        conversation = updatedConversation || {...conversation,title}
+      }
 
-    const payload = {
-      prompt:value.trim(),conversationId:conversation?._id
+      const payload = {
+        prompt,conversationId:conversation._id,
+        agent:selectedAgent.toLowerCase()
+      }
+
+      dispatch(addMessage({role:"user",content:prompt}))
+      setValue("")
+
+      const data = await sendMessage(payload)
+      if (!data) return
+      dispatch(addMessage({role:"assistant",content:data?.answer,images:data.images}))
+    } finally {
+      setIsSending(false)
     }
-
-    dispatch(addMessage({role:"user",content:value.trim()}))
-    setValue("")
-
-    const data = await sendMessage(payload)
-    if (data === null) return
-    console.log("AI response:", data)
-    dispatch(addMessage({role:"assistant",content:data}))
-    if (data) setValue("")
   }
 
   const agents = [
@@ -95,8 +102,11 @@ function ChatInput() {
                   const isActive = selectedAgent === agent.label
                   const Icon = agent.icon
                   return(
-                    <div className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-medium border transition-all
+                    <div key={agent.id} onClick={() => {setSelectedAgent(agent.label)}} className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-medium border transition-all cursor-pointer
                     ${isActive ? "bg-linear-to-b from-indigo-500 to-violet-600 text-white border-transparent shadow[0_1px_8Px_rgba(99,102,241,35)]" : "bg-white/3 text-slate-600 border-white/6 hover:bg-white/7"}`}>
+
+                      <Icon size={14} className={isActive ? "text-white" : "text-slate-500"}/>
+                      {agent.label}
 
                     </div>
                   )
@@ -107,7 +117,7 @@ function ChatInput() {
           placeholder='Ask Anything...'
           onChange={(e)=>setValue(e.target.value)}
           value={value}
-          disabled={!selectedConversation}
+          disabled={isSending}
           className='w-full bg-transparent outline-none resize-none text-[14px] text-slate-200 placeholder:text-slate-600 leading-relaxed scrollbar-none [&::-white-scrollbar]:hidden disabled:opacity-50' rows={3}/>
 
           <div className='flex items-centre justify-between'>
@@ -119,7 +129,7 @@ function ChatInput() {
                     <Mic size={16}/>
                 </button>
             </div>
-            <button disabled={!value} onClick={handleSendMessage} className='flex items-center justify-center w-8 h-8 rounded-lg border-none cursor-pointer transition-all duration-150 bg-gradient-to-r from-indigo-500 to-violet-700 hover:opacity-90 text-white'>
+            <button disabled={!value.trim() || isSending} onClick={handleSendMessage} className='flex items-center justify-center w-8 h-8 rounded-lg border-none cursor-pointer transition-all duration-150 bg-linear-to-r from-indigo-500 to-violet-700 hover:opacity-90 text-white'>
               <Send size={15}/>
             </button>
           </div>

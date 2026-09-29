@@ -2,10 +2,19 @@ import { AIMessage, HumanMessage, SystemMessage } from "@langchain/core/messages
 import { getModel } from "../config/llmModels.js"
 import { getMemory } from "../config/Memory.js"
 
-export const chatAgent = async (params) => {
+export const chatAgent = async (state) => {
     const llm = await getModel("chat")
-    const history = await getMemory(params.conversationId, params.userId)
+    const history = await getMemory(state.conversationId, state.userId)
+    const searchContext = state.searchResults?`Web search results:
+    ${JSON.stringify(state.searchResults)} Answer the user using only the above search result`:""
+
     const systemPrompt = `You are Igris AI, an intelligent AI assistant.
+    ${searchContext}
+    If searchContext exists:
+    -Use search results to answer.
+    -Do not mention internal tools.
+
+    
     Rules: 
     - For simple questions, greetings and short queries, respond naturally in plain text.
     - For technical, educational, coding, or detailed topics, use clean Markdown.
@@ -31,12 +40,12 @@ export const chatAgent = async (params) => {
         }
     })
 
-    messages.push(new HumanMessage(params.prompt))
+    messages.push(new HumanMessage(state.prompt))
     console.log(messages)
     const response = await llm.invoke(messages) 
 
     return {
-        ...params,
+        ...state,
         aiResponse: response.content
     }
 }

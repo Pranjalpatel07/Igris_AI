@@ -1,10 +1,17 @@
 import { getModel } from "../config/llmModels.js"
 
 export const router = async (state) => {
+    if(state.agent && state.agent !== "auto") {
+        return{
+            ...state,
+            agent:state.agent
+        }
+    }
     const llm = await getModel("router")
     const prompt = `You are a agent router 
     Available agents:
     -chat
+    -search
     -coding
     
     Rules:
@@ -12,17 +19,13 @@ export const router = async (state) => {
     chat:
     General conversation, explanations, learning, and all requests that do not require writing or debugging code.
 
+    search:
+    Requests for current information, web research, or related images.
+
     coding:
     Generate code, debug code, build projects, architecture, API design.
 
-    Return only one word:
-
-    chat 
-    search
-    coding
-    pdf
-    ppt
-    vision
+    Return only one word: chat, search, or coding.
 
     User Query :
      ${state.prompt}

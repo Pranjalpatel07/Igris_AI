@@ -3,7 +3,7 @@ import {graph} from "../graph/graph.js"
 import {addMessage} from '../config/Memory.js'
 export const agent = async (req,res) => {
     try {
-        const {prompt , conversationId} = req.body
+        const {prompt , conversationId,agent} = req.body
         const userId = req.headers["x-user-id"]
         if (!userId) return res.status(401).json({message:"Unauthorized"})
         if (typeof prompt !== "string" || !prompt.trim() || !conversationId) {
@@ -22,6 +22,7 @@ export const agent = async (req,res) => {
         const result = await graph.invoke({
             prompt ,
             conversationId,
+            agent,
             userId
         })
         const response = result.aiResponse
@@ -33,13 +34,17 @@ export const agent = async (req,res) => {
         await axios.post(`${process.env.CHAT_SERVICE}/save-message`,{
             conversationId,
             role:"assistant",
-            content:response
+            content:response,
+            images:result.images
         },{
             headers:{"x-user-id":userId}
         })
         await addMessage(conversationId,"assistant",response)
         
-        return res.status(200).json(response)
+        return res.status(200).json({
+            answer:result.aiResponse,
+            images:result.images
+        })
     } catch (error) {
         console.error("agent request error",error)
         return res.status(500).json({message:"Agent request failed"})

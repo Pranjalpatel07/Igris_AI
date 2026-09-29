@@ -32,7 +32,7 @@ function MessageList() {
         <div className='space-y-4'>
           {messages?.map((msg, index) => (
             <div key={`${msg?.role}-${index}`}>
-              <MessageBubble role={msg?.role} content={msg?.content || ''} />
+              <MessageBubble role={msg?.role} content={msg?.content || ''} images={msg.images || []} />
             </div>
           ))}
         </div>
