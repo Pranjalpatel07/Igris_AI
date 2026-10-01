@@ -59,7 +59,7 @@ export const updateConversation = async (req,res) => {
 
 export const saveMessage = async (req,res) => {
     try {
-        const {conversationId,role,content,images} = req.body
+        const {conversationId,role,content,images,artifacts} = req.body
         const userId = req.headers["x-user-id"]
         if (!userId) return res.status(401).json({message:"Unauthorized"})
         if (!mongoose.isValidObjectId(conversationId) || !["user","assistant"].includes(role) || typeof content !== "string" || !content.trim()) {
@@ -71,7 +71,8 @@ export const saveMessage = async (req,res) => {
             conversationId,
             role,
             content,
-            images
+            images,
+            artifacts
         })
         return res.status(200).json(message)
 

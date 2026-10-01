@@ -15,7 +15,7 @@ function MessageBubble({ role, content, images = [] }) {
     await navigator.clipboard.writeText(code)
     setCopiedCode(code)
     setTimeout(() => {
-      setCopiedCode
+      setCopiedCode("")
     },2000)
   }
 
@@ -88,7 +88,7 @@ function MessageBubble({ role, content, images = [] }) {
               .trim();
               if(!className){
                 return(
-                  <code className="px-1.5 py-0.5 rounded bg-wihte/10 text-indigo-300">
+                  <code className="px-1.5 py-0.5 rounded bg-transparent text-indigo-300">
                     {children}
                   </code>
                 )

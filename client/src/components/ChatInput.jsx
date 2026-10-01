@@ -9,7 +9,7 @@ import { updateConversation } from '../features/updateConversation';
 
 function ChatInput() {
   const [value,setValue] = useState("");
-  const [selectedAgent,setSelectedAgent] = useState("Auto")
+  const [selectedAgent,setSelectedAgent] = useState("auto")
   const [isSending,setIsSending] = useState(false)
   const {selectedConversation} = useSelector(state => state.conversation)
   const dispatch = useDispatch()
@@ -39,7 +39,7 @@ function ChatInput() {
 
       const payload = {
         prompt,conversationId:conversation._id,
-        agent:selectedAgent.toLowerCase()
+        agent:selectedAgent
       }
 
       dispatch(addMessage({role:"user",content:prompt}))
@@ -99,10 +99,10 @@ function ChatInput() {
 
           <div className='flex w-[80%] gap-2 flex-wrap '>
               {agents.map((agent) => {
-                  const isActive = selectedAgent === agent.label
+                  const isActive = selectedAgent === agent.id
                   const Icon = agent.icon
                   return(
-                    <div key={agent.id} onClick={() => {setSelectedAgent(agent.label)}} className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-medium border transition-all cursor-pointer
+                    <div key={agent.id} onClick={() => {setSelectedAgent(agent.id)}} className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-medium border transition-all cursor-pointer
                     ${isActive ? "bg-linear-to-b from-indigo-500 to-violet-600 text-white border-transparent shadow[0_1px_8Px_rgba(99,102,241,35)]" : "bg-white/3 text-slate-600 border-white/6 hover:bg-white/7"}`}>
 
                       <Icon size={14} className={isActive ? "text-white" : "text-slate-500"}/>

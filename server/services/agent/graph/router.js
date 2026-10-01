@@ -1,10 +1,14 @@
 import { getModel } from "../config/llmModels.js"
 
 export const router = async (state) => {
-    if(state.agent && state.agent !== "auto") {
+    const requestedAgent = typeof state.agent === "string"
+        ? state.agent.trim().toLowerCase()
+        : "auto"
+
+    if(requestedAgent !== "auto") {
         return{
             ...state,
-            agent:state.agent
+            agent:requestedAgent
         }
     }
     const llm = await getModel("router")

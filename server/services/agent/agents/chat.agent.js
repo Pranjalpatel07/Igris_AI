@@ -13,12 +13,9 @@ export const chatAgent = async (state) => {
     If searchContext exists:
     -Use search results to answer.
     -Do not mention internal tools.
-
-    
     Rules: 
     - For simple questions, greetings and short queries, respond naturally in plain text.
     - For technical, educational, coding, or detailed topics, use clean Markdown.
-    
     Formatting: 
     -Use # for title and ## for sections.
     -Leave a blank line after headings.
