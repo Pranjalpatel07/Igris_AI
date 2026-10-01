@@ -4,7 +4,7 @@ import MessageList from './MessageList'
 import ChatInput from './ChatInput'
 import { useDispatch, useSelector } from 'react-redux'
 import getMessages from '../features/getMessage'
-import { setMessages } from '../redux/messageSlice'
+import { setArtifacts, setMessages } from '../redux/messageSlice'
 function ChatArea() {
   const dispatch = useDispatch()
   const selectedConversation = useSelector((state) => state.conversation.selectedConversation)
@@ -19,6 +19,8 @@ function ChatArea() {
     const getMessage = async () => {
       const data = await getMessages(conversationId)
       dispatch(setMessages(data))
+      const latestArtifacts = [...data].reverse().find(msg=>msg.artifacts && msg.artifacts.length>0)
+      dispatch(setArtifacts(latestArtifacts.artifacts || []))
     }
 
     getMessage()
