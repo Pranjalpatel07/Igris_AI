@@ -36,8 +36,13 @@ export const codingAgent = async (state) => {
 		-Hover Effects
 		-Beautiful spacing
 		-single page unless user asks otherwise.
+
+		IMAGES
+		*******************************
+
+		Always use real Unsplash images.
+		Never use placeholders.
 		
-		Return Only valid JSON.
 		Schema:
 		 
 		{
@@ -64,6 +69,7 @@ export const codingAgent = async (state) => {
 		-No extra text
 		-NO \`\`\`
 		-Never mention intent 
+		-Give response in JSON format only.
 
 		User Request:
 		${state.prompt}

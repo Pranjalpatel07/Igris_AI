@@ -1,4 +1,4 @@
-import {Code2, Copy, Eye, PanelRightClose} from "lucide-react"
+import {Check, Code2, Copy, Eye, PanelRightClose} from "lucide-react"
 import { easeInOut, motion } from "motion/react"
 import Editor from '@monaco-editor/react';
 import { useState } from "react"
@@ -9,33 +9,42 @@ function Artifact() {
   const {artifacts} = useSelector(state=>state.message)
   const [tab,setTab] = useState("code")
   const [activeFile,setActiveFile] = useState(0)
+  const [copied,setCopied] = useState(false)
 
+  
   if(artifacts.length == 0) return;
   const file = artifacts[0]?.files[activeFile]
   const htmlfile = artifacts[0]?.files?.find(f=>f.name === "index.html")
   const cssfile = artifacts[0]?.files?.find(f=>f.name === "style.css")
   const jsfile = artifacts[0]?.files?.find(f=>f.name === "script.js")
-
+  
   const canPreview = Boolean(htmlfile)
-   const previewDoc = `<!DOCTYPE html>
-   <html lang="en">
-   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  const previewDoc = `<!DOCTYPE html>
+  <html lang="en">
+  <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
-      ${cssfile?.content || ""}
+    ${cssfile?.content || ""}
     </style>
-   </head>
-   <body>
-   ${htmlfile?.content || ""}
+    </head>
+    <body>
+    ${htmlfile?.content || ""}
     
     <script>
-      ${jsfile?.content || ""}
+    ${jsfile?.content || ""}
     </script>
-   </body>
-   </html>`
-
-   const detectLanguage = (fileName="") => {
+    </body>
+    </html>`
+    
+    const  handleCopy = async () =>{
+      await navigator.clipboard.writeText(file?.content)
+      setCopied(true)
+      setTimeout(() => {
+        setCopied(false)
+      },2000)
+    }
+    const detectLanguage = (fileName="") => {
     const name = fileName.toLowerCase()
     if(name.endsWith(".html")) return "html"
     if(name.endsWith(".css")) return "css"
@@ -66,9 +75,9 @@ function Artifact() {
           <div className="text-[13px] font-medium text-slate-200 truncate">{artifacts[0]?.title}</div>
 
           <div className="flex items-center gap-l shrink-0">
-             <button className="flex items-centre gap-1.5 px-2.5 py-1.5 text-[11px] font-medium text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg transition-colors duration-150 bg-transparent borderr-none cursor-pointer">
+             <button onClick={handleCopy} className="flex items-centre gap-1.5 px-2.5 py-1.5 text-[11px] font-medium text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded-lg transition-colors duration-150 bg-transparent borderr-none cursor-pointer">
 
-             <Copy size={15}/>
+             {copied ? <Check size={15}/> : <Copy size={15}/>}
              </button>
           </div>
 
