@@ -13,14 +13,18 @@ function ChatArea() {
     const conversationId = selectedConversation?._id
     if (!conversationId) {
       dispatch(setMessages([]))
+      dispatch(setArtifacts([]))
       return
     }
 
     const getMessage = async () => {
       const data = await getMessages(conversationId)
-      dispatch(setMessages(data))
-      const latestArtifacts = [...data].reverse().find(msg=>msg.artifacts && msg.artifacts.length>0)
-      dispatch(setArtifacts(latestArtifacts.artifacts || []))
+      const messages = Array.isArray(data) ? data : []
+      dispatch(setMessages(messages))
+      const latestArtifacts = [...messages].reverse().find(
+        (msg) => Array.isArray(msg?.artifacts) && msg.artifacts.length > 0
+      )
+      dispatch(setArtifacts(latestArtifacts?.artifacts ?? []))
     }
 
     getMessage()

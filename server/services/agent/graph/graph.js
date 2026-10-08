@@ -19,7 +19,33 @@ workflow.addNode("pdf",pdfAgent)
 workflow.addNode("ppt",pptAgent)
 
 workflow.addEdge("__start__","router")
-workflow.addConditionalEdges("router",(state)=>["coding", "search","image", "pdf", "ppt"].includes(state.agent) ? state.agent : "chat",{
+workflow.addConditionalEdges("router", (state) => {
+    const agent = typeof state.agent === "string" ? state.agent.trim().toLowerCase() : "chat"
+
+    switch (agent) {
+        case "coding":
+        case "code":
+            return "coding"
+        case "search":
+        case "web":
+        case "research":
+            return "search"
+        case "vision":
+        case "image":
+        case "images":
+        case "imagegen":
+            return "vision"
+        case "pdf":
+            return "pdf"
+        case "ppt":
+        case "powerpoint":
+        case "presentation":
+            return "ppt"
+        case "chat":
+        default:
+            return "chat"
+    }
+}, {
     chat:"chat",
     coding:"coding",
     search:"search",

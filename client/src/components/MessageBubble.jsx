@@ -83,6 +83,15 @@ function MessageBubble({ role, content, images = [] }) {
             a:({href,children}) => (
               <a href={href} target="_blank" rel="noreferrer" className="text-indigo-400 underline inline-flex items-center gap-1">{children} <ExternalLink size={14}/></a>
             ),
+            img:({src,alt}) => (
+              <img
+                src={src}
+                alt={alt || "Generated image"}
+                loading="lazy"
+                onClick={() => src && setLightBox(src)}
+                className="my-3 max-w-full max-h-112 rounded-xl border border-white/10 object-contain cursor-zoom-in"
+              />
+            ),
             code:({className,children}) =>{
               const value = String(children)
               .trim();

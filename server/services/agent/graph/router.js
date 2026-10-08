@@ -12,28 +12,39 @@ export const router = async (state) => {
         }
     }
     const llm = await getModel("router")
-    const prompt = `You are a agent router 
+    const prompt = `You are an agent router.
     Available agents:
-    -chat
-    -search
-    -coding
-    
+    - chat
+    - search
+    - coding
+    - vision
+    - pdf
+    - ppt
+
     Rules:
 
     chat:
-    General conversation, explanations, learning, and all requests that do not require writing or debugging code.
+    General conversation, explanations, learning, and all requests that do not require writing code, web research, PDF work, image generation, or presentations.
 
     search:
-    Requests for current information, web research, or related images.
+    Requests for current information, web research, or live data lookup.
 
     coding:
-    Generate code, debug code, build projects, architecture, API design.
+    Generate code, debug code, build projects, architecture, API design, and technical implementations.
 
-    Return only one word: chat, search, or coding.
+    vision:
+    Requests to generate or edit images, visuals, or artwork.
 
-    User Query :
-     ${state.prompt}
+    pdf:
+    Requests involving PDF files, summarization, extraction, or document analysis.
 
+    ppt:
+    Requests to create, edit, or generate PowerPoint presentations and slide decks.
+
+    Return only one word: chat, search, coding, vision, pdf, or ppt.
+
+    User Query:
+    ${state.prompt}
     `
     const response = await llm.invoke(prompt)
 

@@ -3,8 +3,10 @@ import { getModel } from "../config/llmModels.js"
 import { getMemory } from "../config/Memory.js"
 
 export const chatAgent = async (state) => {
-    const llm = await getModel("chat")
-    const history = await getMemory(state.conversationId, state.userId)
+    try {
+        
+        const llm = await getModel("chat")
+        const history = await getMemory(state.conversationId, state.userId)
     const searchContext = state.searchResults?`Web search results:
     ${JSON.stringify(state.searchResults)} Answer the user using only the above search result`:""
 
@@ -45,4 +47,10 @@ export const chatAgent = async (state) => {
         ...state,
         aiResponse: response.content
     }
+} catch (error) {
+    return {
+        ...state,
+        aiResponse: "Failed to generate chat."
+    }
+}
 }
