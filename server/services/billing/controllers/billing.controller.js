@@ -1,13 +1,14 @@
-import axios from "axios"
+import axios from "axios";
 import razorpay from "../config/razorpay.js";
 import Payment from "../models/payment.model.js";
-import { PLANS } from "../models/plans";
+import { PLANS } from "../models/plans.js";
+import crypto from "crypto";
 
 export const createOrder = async (req, res) => {
   try {
     const { plan } = req.body;
     const userId = req.headers["x-user-id"];
-    selectedPlan = PLANS[plan];
+    const selectedPlan = PLANS[plan];
 
     if (!selectedPlan) {
       return res.status(404).json({ message: "plan not found" });
@@ -39,29 +40,33 @@ export const createOrder = async (req, res) => {
   }
 };
 
-export const verifyPayment = async () => {
+export const verifyPayment = async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
       req.body;
     const generateSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-      .update(`${razorpay_order_id} | ${razorpay_payment_id}`)
-      .digest("hex")
-    if(generateSignature !== razorpay_signature){
-        return res.status(400).json({message:"Payment verification failed"})
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+      .digest("hex");
+    if (generateSignature !== razorpay_signature) {
+      return res.status(400).json({ message: "Payment verification failed" });
     }
-    const payment = await Payment.findOne({orderId:razorpay_order_id})
-    if(!payment){
-        return res.status(404).json({message:"Payment not found"})
+    const payment = await Payment.findOne({ orderId: razorpay_order_id });
+    if (!payment) {
+      return res.status(404).json({ message: "Payment not found" });
     }
-    payment.status="paid"
-    payment.paymentId = razorpay_payment_id
-    await payment.save()
+    payment.status = "paid";
+    payment.paymentId = razorpay_payment_id;
+    await payment.save();
 
-    await axios.post(`${process.env.AUTH_SERVICE}/update-plan`,{userId:payment.userId,plan:payment.plan,credits:payment.credits})
+    await axios.post(`${process.env.AUTH_SERVICE}/update-plan`, {
+      userId: payment.userId,
+      plan: payment.plan,
+      credits: payment.credits,
+    });
 
-    return res.status(200).json({message:"payment verify"})
-}catch(error){
-    return res.status(500).json({message:`verify payment error ${error}`})
-}
-}
+    return res.status(200).json({ message: "payment verify" });
+  } catch (error) {
+    return res.status(500).json({ message: `verify payment error ${error}` });
+  }
+};
