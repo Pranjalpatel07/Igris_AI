@@ -6,6 +6,8 @@ import {addMessage, setArtifacts} from '../redux/messageSlice'
 import {createConversation} from '../features/createConversation'
 import { addConversation, setConvTitle, setSelectConversation } from '../redux/conversationSlice';
 import { updateConversation } from '../features/updateConversation';
+import getCurrentUser from '../features/getCurrentUser';
+import { setUserData } from '../redux/userSlice';
 
 function ChatInput() {
   const [value,setValue] = useState("");
@@ -42,13 +44,20 @@ function ChatInput() {
         agent:selectedAgent
       }
 
-      dispatch(addMessage({role:"user",content:prompt}))
+      dispatch(addMessage({role:"user",content:prompt,conversationId:conversation._id}))
       setValue("")
 
       const data = await sendMessage(payload)
       if (!data) return
       dispatch(setArtifacts(data.artifacts || []))
-      dispatch(addMessage({role:"assistant",content:data?.answer,images:data.images}))
+      dispatch(addMessage({
+        role:"assistant",
+        content:data?.answer,
+        images:data.images,
+        conversationId:conversation._id
+      }))
+      const updatedUser = await getCurrentUser()
+      if (updatedUser) dispatch(setUserData(updatedUser))
     } finally {
       setIsSending(false)
     }

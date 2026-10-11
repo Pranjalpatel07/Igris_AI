@@ -1,3 +1,4 @@
+import { deductCredits } from "../utils/deductCredits.js"
 import { getModel } from "../config/llmModels.js"
 import { generatePpt } from "../utils/generatePpt.js"
 import { getFromS3 } from "../utils/getFromS3.js"
@@ -52,7 +53,7 @@ ${state.prompt}`
     const filename =`ppt-${Date.now()}.pptx`
     await uploadToS3(filename,buffer,"application/vnd.openxmlformats-officedocument.presentationml.presentation")
     const downloadUrl = await getFromS3(filename,24*60*60)
-
+    await deductCredits(state.userId,"ppt")
     return{
         ...state,
         aiResponse:`# Presentation Generated

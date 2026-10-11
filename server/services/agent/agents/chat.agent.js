@@ -1,10 +1,10 @@
 import { AIMessage, HumanMessage, SystemMessage } from "@langchain/core/messages"
 import { getModel } from "../config/llmModels.js"
 import { getMemory } from "../config/Memory.js"
+import { deductCredits } from "../utils/deductCredits.js"
 
 export const chatAgent = async (state) => {
     try {
-        
         const llm = await getModel("chat")
         const history = await getMemory(state.conversationId, state.userId)
     const searchContext = state.searchResults?`Web search results:
@@ -42,12 +42,13 @@ export const chatAgent = async (state) => {
     messages.push(new HumanMessage(state.prompt))
     console.log(messages)
     const response = await llm.invoke(messages) 
-
+    await deductCredits(state.userId,"chat")
     return {
         ...state,
         aiResponse: response.content
     }
 } catch (error) {
+    console.log(error)
     return {
         ...state,
         aiResponse: "Failed to generate chat."

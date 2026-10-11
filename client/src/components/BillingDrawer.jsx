@@ -7,6 +7,7 @@ import { verifyPayment } from "../features/verifyPayment";
 
 function BillingDrawer({ open, onClose }) {
   const {userData} = useSelector(state=>state.user)
+  const totalCredits = userData?.totalCredits ?? userData?.titalCredits ?? 100
   const handleUpgrade = async (plan) => {
     try {
       const data = await createOrder(plan)
@@ -82,16 +83,12 @@ function BillingDrawer({ open, onClose }) {
                 <div className="mt-5">
                   <div className="flex justify-between text-xs text-slate-400 mb-2">
                     <span>Creatids</span>
-                    <span>{userData.credits || 0}/{userData.totalCredits || 100}</span>
+                    <span>{userData?.credits ?? 0}/{totalCredits}</span>
                   </div>
                   <div className="h-2 rounded-full bg-white/10 overflow-hidden">
                     <div className="h-full bg-indigo-500 transition-all duration-500"
                     style={{
-                      width:`${(
-                        (userData?.credits || 0) / 
-                        (userData?.totalCredits || 1)
-                      )* 100 
-                      }%`
+                      width:`${Math.min(100, ((userData?.credits ?? 0) / (totalCredits || 1)) * 100)}%`
                     }}/>
                   </div>
                 </div>
