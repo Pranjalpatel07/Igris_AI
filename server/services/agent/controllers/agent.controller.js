@@ -4,6 +4,7 @@ import {addMessage} from '../config/Memory.js'
 export const agent = async (req,res) => {
     try {
         const {prompt , conversationId,agent:requestedAgent} = req.body
+        const file = req.file
         const agent = typeof requestedAgent === "string"
             ? requestedAgent.trim().toLowerCase()
             : "auto"
@@ -24,10 +25,11 @@ export const agent = async (req,res) => {
         
         console.log("Requested agent:", agent)
         const result = await graph.invoke({
-            prompt ,
+            prompt,
             conversationId,
             agent,
-            userId
+            userId,
+            file
         })
         console.log("Resolved agent:", result.agent)
         const response = result?.aiResponse
