@@ -1,4 +1,4 @@
-import { Code2, FileText, Globe, ImageIcon, MessageSquare, Mic, Paperclip, Presentation, Send, Shrink, Zap} from 'lucide-react'
+import { Code2, FileText, Globe, ImageIcon, MessageSquare, Mic, Paperclip, Presentation, Send, Zap} from 'lucide-react'
 import { useState } from 'react'
 import sendMessage from '../features/sendMessage';
 import { useDispatch, useSelector } from 'react-redux';
@@ -8,12 +8,15 @@ import { addConversation, setConvTitle, setSelectConversation } from '../redux/c
 import { updateConversation } from '../features/updateConversation';
 import getCurrentUser from '../features/getCurrentUser';
 import { setUserData } from '../redux/userSlice';
+import { useRef } from 'react';
 
 function ChatInput() {
   const [value,setValue] = useState("");
   const [selectedAgent,setSelectedAgent] = useState("auto")
   const [isSending,setIsSending] = useState(false)
   const {selectedConversation} = useSelector(state => state.conversation)
+  const [selectedFile,setselectedFile] = useState(null);
+  const fileRef = useRef(null)
   const dispatch = useDispatch()
 
   const handleSendMessage = async () => {
@@ -39,15 +42,18 @@ function ChatInput() {
         conversation = updatedConversation || {...conversation,title}
       }
 
-      const payload = {
-        prompt,conversationId:conversation._id,
-        agent:selectedAgent
+      const formData = new FormData()
+      formData.append("prompt", prompt)
+      formData.append("conversationId", conversation._id)
+      formData.append("agent", selectedAgent)
+      if (selectedFile) {
+        formData.append("file", selectedFile)
       }
 
       dispatch(addMessage({role:"user",content:prompt,conversationId:conversation._id}))
       setValue("")
 
-      const data = await sendMessage(payload)
+      const data = await sendMessage(formData)
       if (!data) return
       dispatch(setArtifacts(data.artifacts || []))
       dispatch(addMessage({
@@ -131,8 +137,15 @@ function ChatInput() {
           className='w-full bg-transparent outline-none resize-none text-[14px] text-slate-200 placeholder:text-slate-600 leading-relaxed scrollbar-none [&::-white-scrollbar]:hidden disabled:opacity-50' rows={3}/>
 
           <div className='flex items-centre justify-between'>
-            <div>
-                <button className='flex items-center justify-center w-8 h-8 rounded-lg text-slate-600 hover:text-slate-400 hover:bg-white/5 border border-transparent hover:border-white/6 transition-all duration-150 bg-transparent cursor-pointer'>
+            <div className='flex items-center gap-1'>
+              <input type="file" accept="application/pdf,image/*,.png,.jpg,.jpeg,.webp" hidden ref={fileRef} onChange={(e)=>{
+                const file = e.target.files[0]
+                if (file) {
+                  setselectedFile(file)
+                }
+              }} />
+
+                <button className='flex items-center justify-center w-8 h-8 rounded-lg text-slate-600 hover:text-slate-400 hover:bg-white/5 border border-transparent hover:border-white/6 transition-all duration-150 bg-transparent cursor-pointer' onClick={()=>fileRef.current.click()}>
                     <Paperclip size={16}/>
                 </button>
                 <button className='flex items-center justify-center w-8 h-8 rounded-lg text-slate-600 hover:text-slate-400 hover:bg-white/5 border border-transparent hover:border-white/6 transition-all duration-150 bg-transparent cursor-pointer'>

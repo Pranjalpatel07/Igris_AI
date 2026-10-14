@@ -7,7 +7,7 @@ import { searchAgent } from "../agents/search.agent.js";
 import { visionAgent } from "../agents/imageGen.agent.js"
 import { pdfAgent } from "../agents/pdf.agent.js"
 import { pptAgent } from "../agents/ppt.agent.js"
-import { imageAnalyzer } from "../agents/imageAnalizer.js";
+import { imageAnalyzer } from "../agents/imageAnalyzer.js";
 import { pdfRag } from "../agents/pdfRag.js";
 
 const workflow = new StateGraph(agentState)
