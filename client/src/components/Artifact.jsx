@@ -1,5 +1,5 @@
-import {Check, Code2, Copy, Eye, PanelRightClose} from "lucide-react"
-import { easeInOut, motion } from "motion/react"
+import {Check, Code2, Copy, Eye, PanelRightClose, X} from "lucide-react"
+import { AnimatePresence, easeInOut, motion } from "motion/react"
 import Editor from '@monaco-editor/react';
 import { useState } from "react"
 import { useSelector } from "react-redux"
@@ -10,6 +10,7 @@ function Artifact() {
   const [tab,setTab] = useState("code")
   const [activeFile,setActiveFile] = useState(0)
   const [copied,setCopied] = useState(false)
+  const [mobileOpen,setMobileOpen] = useState(false)
 
   
   if(artifacts.length == 0) return;
@@ -19,6 +20,9 @@ function Artifact() {
   const jsfile = artifacts[0]?.files?.find(f=>f.name === "script.js")
   
   const canPreview = Boolean(htmlfile)
+  const previewHtml = (htmlfile?.content || "")
+    .replace(/<script\b(?=[^>]*\bsrc\s*=\s*["'][^"']*\/?script\.js(?:[?#][^"']*)?["'])[^>]*>\s*<\/script\s*>/gi, "")
+    .replace(/<link\b(?=[^>]*\bhref\s*=\s*["'][^"']*\/?style\.css(?:[?#][^"']*)?["'])[^>]*\/?>/gi, "")
   const previewDoc = `<!DOCTYPE html>
   <html lang="en">
   <head>
@@ -29,7 +33,7 @@ function Artifact() {
     </style>
     </head>
     <body>
-    ${htmlfile?.content || ""}
+    ${previewHtml}
     
     <script>
     ${jsfile?.content || ""}
@@ -61,13 +65,14 @@ function Artifact() {
     return "plaintext"
 
    }
-  
-  return (
-    <motion.div initial={{width:400}} animate={{width:collapsed?48:400}} transition={{ duration:0.25, ease:easeInOut}}  className="hidden lg:flex h-full border-l border-white/6 flex-col overflow-hidden shrink-0 w-75">
-      {!collapsed ? <div className="flex flex-col h-full bg-[#0d0f14]">
+
+   const renderPanel = (onClose) => {
+      return(
+        <>
+        {!collapsed ? <div className="flex flex-col h-full bg-[#0d0f14]">
         <div className="h-14 px-4 border-b border-white/6 flex items-center gap-3 shrink-0">
-          <button className="flex items-center justify-center w-7 h-7 rounded-lg text-slate-500 hover:text-slate-200 hover:bg-white/5 transition-colors duration-150 bg-transparent border-none cursor-poniter shrink-0" onClick={()=>setCollapsed(true)}>
-            <PanelRightClose size={16}/>
+          <button className="flex items-center justify-center w-7 h-7 rounded-lg text-slate-500 hover:text-slate-200 hover:bg-white/5 transition-colors duration-150 bg-transparent border-none cursor-poniter shrink-0" onClick={onClose ?? (() => setCollapsed(true))}>
+            {onClose ? <X size={15}/> : <PanelRightClose size={16}/> }
           </button>
           <div >
             <Code2 className="text-indigo-400" size={12}/>
@@ -98,7 +103,7 @@ function Artifact() {
         <div className="flex h-auto border-b border-white/6 overflow-x-auto scrollbar-none [&::webkit-scrollbar]:hidden shrink-0">
           {
             artifacts[0]?.files?.map((f,index) => (
-              <button className={`px-4  py-2.5 text-[11px] font-medium whitespace-nowrap transition-colors duration-150 border-r border-white/5 relative cursor-pointer bg-transparent ${activeFile === index ? "text-slate-400" : "text-slate-500 hover:text-slate-300"} `} onClick={()=>setActiveFile(index)}>
+              <button key={`${f?.name ?? "file"}-${index}`} className={`px-4  py-2.5 text-[11px] font-medium whitespace-nowrap transition-colors duration-150 border-r border-white/5 relative cursor-pointer bg-transparent ${activeFile === index ? "text-slate-400" : "text-slate-500 hover:text-slate-300"} `} onClick={()=>setActiveFile(index)}>
                 {f?.name }
                 {activeFile === index && <div className="absolute botton-0 left-0 right-0 h-0.5 bg-indigo-500 rounded-t-full"/>}
               </button>
@@ -134,10 +139,34 @@ function Artifact() {
             }} className="text-[13px] font-medium text-slate-200 truncate">{artifacts[0]?.title}</div>
           </div>
       </div>
+   }</>
+      )
+   }
+  
+  return (
+    <>
+    <button onClick={() => setMobileOpen(true)} className="lg:hidden fixed bottom-24 right-4 z-40 flex items-center gap-2 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[12px] font-medium shadow-lg shadow-indigo-500/20 border-none cursor-pointer transition-colors duration-150">
+      <Code2 size={13}/> 
+      View Code
+    </button>
+
+    <AnimatePresence>
+    
+      {mobileOpen && <> 
+      <motion.div initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}} transition={{duration: 0.2}} onClick={() => setMobileOpen(false)} className="lg:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"/>
+        <motion.div initial={{x: "100%"}} animate={{x: 0}} exit={{x: "100%"}} transition={{duration:0.25, ease: "easeInOut"}} className="lg:hidden fixed inset-y-0 right-0 z-50 w-[88vw] max-w-105 border-l border-white/6 overflow-hidden">
+          {renderPanel(() => setMobileOpen(false))}
+        </motion.div>
+      </>
+      }
+    </AnimatePresence>
+
+    <motion.div initial={{width:400}} animate={{width:collapsed?48:400}} transition={{ duration:0.25, ease:easeInOut}}  className="hidden lg:flex h-full border-l border-white/6 flex-col overflow-hidden shrink-0 w-75">
       
-    }
+      {renderPanel()}
       
     </motion.div>
+    </>
   )
 }
 
