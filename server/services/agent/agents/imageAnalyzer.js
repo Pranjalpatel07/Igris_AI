@@ -4,10 +4,16 @@ import fs from "fs";
 import { deductCredits } from "../utils/deductCredits.js";
 
 export const imageAnalyzer = async (state) => {
+  const filePath = state?.file?.path
+
   try {
+    if (!filePath) {
+      return { ...state, aiResponse: "No image file was uploaded." }
+    }
+
     const llm = await getModel("imageAnalyzer");
 
-    const imageBuffer = fs.readFile(state.file.path);
+    const imageBuffer = fs.readFileSync(filePath);
     const base64image = imageBuffer.toString("base64");
     const messages = [
       new SystemMessage(
@@ -39,18 +45,34 @@ Rule:
       }),
     ];
     const response = await llm.invoke(messages)
+    const answer = typeof response.content === "string"
+      ? response.content
+      : Array.isArray(response.content)
+        ? response.content
+            .filter((part) => part?.type === "text" && typeof part.text === "string")
+            .map((part) => part.text)
+            .join("\n")
+        : ""
+
+    if (!answer.trim()) {
+      throw new Error("The image model returned an empty response.")
+    }
+
     await deductCredits(state.userId,"vision")
     return{
         ...state,
-        aiResponse:response.content
+        aiResponse:answer
     }
 
   } catch (error) {
+    console.error("Image analysis error:", error)
     return{
         ...state,
-        aiResponse:"failed to analyze file"
+        aiResponse:"I couldn't analyze the uploaded image. Please try again."
     }
   }finally{
-    fs.unlink(state.file.path)
+    if (filePath && fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath)
+    }
   }
 };

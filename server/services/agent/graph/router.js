@@ -5,22 +5,23 @@ export const router = async (state) => {
         ? state.agent.trim().toLowerCase()
         : "auto"
 
+    if(state.file?.mimetype === "application/pdf"){
+        return{
+            ...state,
+            agent:"pdfrag"
+        }
+    }
+    if(state.file?.mimetype?.startsWith("image/")){
+        return{
+            ...state,
+            agent:"imageanalyzer"
+        }
+    }
+
     if(requestedAgent !== "auto") {
         return{
             ...state,
             agent:requestedAgent
-        }
-    }
-    if(state.file.mimetype === "application/pdf"){
-        return{
-            ...state,
-            agent:"pdfRag"
-        }
-    }
-    if(state.file.mimetype.startsWith("image/")){
-        return{
-            ...state,
-            agent:"imageAnalyzer"
         }
     }
 

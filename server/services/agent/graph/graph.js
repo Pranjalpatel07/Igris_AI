@@ -45,9 +45,9 @@ workflow.addConditionalEdges("router", (state) => {
         case "powerpoint":
         case "presentation":
             return "ppt"
-        case "pdfRag":
+        case "pdfrag":
             return "pdfRag"
-        case "imageAnalyzer":
+        case "imageanalyzer":
             return "imageAnalyzer"
         case "chat":
         default:
@@ -74,4 +74,3 @@ workflow.addEdge("pdfRag", "__end__")
 workflow.addEdge("imageAnalyzer", "__end__")
 
 export const graph = workflow.compile()
-
