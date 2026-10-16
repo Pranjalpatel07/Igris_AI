@@ -9,6 +9,10 @@ const app = express()
 app.use(express.json())
 app.use("/",router)
 
+app.use((err,req,res,next)=>{
+    console.log(err)
+})
+
 app.get("/",(req,res) => {
     res.json({message:"hello from agent"})
 })

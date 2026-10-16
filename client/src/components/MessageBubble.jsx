@@ -1,4 +1,4 @@
-import { Check, Copy, ExternalLink, Heading1, X } from "lucide-react";
+import { Check, Copy, ExternalLink, X } from "lucide-react";
 import { useState } from "react";
 import MarkDown from "react-markdown";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -120,7 +120,19 @@ function MessageBubble({ role, content, images = [] }) {
 
                   </div>
 
-                  <SyntaxHighlighter language={language} style={oneDark}wrapLines showLineNumbers customStyle={{
+                  <SyntaxHighlighter language={language} style={{
+                    ...oneDark,
+                    'pre[class*="language-"]': {
+                      ...oneDark['pre[class*="language-"]'],
+                      background: "#0d1117"
+                    },
+                    'code[class*="language-"]': {
+                      ...oneDark['code[class*="language-"]'],
+                      background: "#0d1117"
+                    }
+                  }} wrapLines showLineNumbers lineProps={() => ({
+                    style: { backgroundColor: "transparent" }
+                  })} customStyle={{
                     margin: 0,
                     padding: "16px",
                     background: "#0d1117",
