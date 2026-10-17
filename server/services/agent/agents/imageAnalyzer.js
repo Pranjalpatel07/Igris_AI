@@ -2,11 +2,13 @@ import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { getModel } from "../config/llmModels.js";
 import fs from "fs";
 import { deductCredits } from "../utils/deductCredits.js";
+import { checkAgentLimit } from "../config/agentLimit.js";
 
 export const imageAnalyzer = async (state) => {
   const filePath = state?.file?.path
 
   try {
+    await checkAgentLimit(state.userId,"image")
     if (!filePath) {
       return { ...state, aiResponse: "No image file was uploaded." }
     }
@@ -67,9 +69,9 @@ Rule:
   } catch (error) {
     console.error("Image analysis error:", error)
     return{
-        ...state,
-        aiResponse:"I couldn't analyze the uploaded image. Please try again."
-    }
+            ...state,
+            aiResponse:error?.data.message || "Failed to analyze image."
+        }
   }finally{
     if (filePath && fs.existsSync(filePath)) {
       fs.unlinkSync(filePath)

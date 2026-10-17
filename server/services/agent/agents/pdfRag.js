@@ -6,11 +6,13 @@ import { getModel } from "../config/llmModels.js"
 import { HumanMessage, SystemMessage } from "@langchain/core/messages"
 import { embeddings } from "../config/embeddings.js"
 import { deductCredits } from "../utils/deductCredits.js"
+import { checkAgentLimit } from "../config/agentLimit.js"
 
 export const pdfRag = async (state) => {
   const filePath = state?.file?.path
 
   try {
+    await checkAgentLimit(state.userId,"pdf")
     if (!filePath) {
       return { ...state, aiResponse: "No PDF file was uploaded." }
     }
@@ -67,10 +69,10 @@ Rules:
     }
   } catch (error) {
     console.error("PDF RAG error:", error)
-    return {
-      ...state,
-      aiResponse: "Failed to analyze pdf",
-    }
+    return{
+            ...state,
+            aiResponse:error?.data.message || "Failed to analyze pdf."
+        }
   } finally {
     if (filePath && fs.existsSync(filePath)) {
       fs.unlinkSync(filePath)

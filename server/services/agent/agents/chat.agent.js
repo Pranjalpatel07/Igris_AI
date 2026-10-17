@@ -2,9 +2,11 @@ import { AIMessage, HumanMessage, SystemMessage } from "@langchain/core/messages
 import { getModel } from "../config/llmModels.js"
 import { getMemory } from "../config/Memory.js"
 import { deductCredits } from "../utils/deductCredits.js"
+import { checkAgentLimit } from '../config/agentLimit.js'
 
 export const chatAgent = async (state) => {
     try {
+        await checkAgentLimit(state.userId,"chat")
         const llm = await getModel("chat")
         const history = await getMemory(state.conversationId, state.userId)
     const searchContext = state.searchResults?`Web search results:
@@ -49,9 +51,9 @@ export const chatAgent = async (state) => {
     }
 } catch (error) {
     console.log(error)
-    return {
-        ...state,
-        aiResponse: "Failed to generate chat."
-    }
+   return{
+            ...state,
+            aiResponse:error?.data.message || "Failed to generate chat."
+        }
 }
 }

@@ -3,10 +3,11 @@ import { getModel } from "../config/llmModels.js"
 import { generatePpt } from "../utils/generatePpt.js"
 import { getFromS3 } from "../utils/getFromS3.js"
 import { uploadToS3 } from "../utils/uploadToS3.js"
+import { checkAgentLimit } from "../config/agentLimit.js"
 
 export const pptAgent = async (state) => {
     try {
-        
+        await checkAgentLimit(state.userId,"ppt")
         const llm = await getModel("ppt")
         const prompt =`
         You are a professional presentation designer.
@@ -66,9 +67,11 @@ _Link expire in 10 minutes._`
     }
 } catch (error) {
     console.log(error)
-    return{
-        ...state,
-        aiResponse:"Failed to generate PPT"
-    }
+
+        return{
+            ...state,
+            aiResponse:error?.data.message || "Failed to generate ppt."
+        }
+    
 }
 }
