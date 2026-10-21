@@ -1,4 +1,4 @@
-import redis from "../../../shared/redis.js"
+import redis from "../../../shared/redis/redis.js"
 
 const limit = {
     chat: 20,
@@ -34,12 +34,11 @@ export const checkAgentLimit = async (userId,agent) => {
             retryAfter: time,
             message:`You have reached the ${agent} limit (${max} requests/minute). Try again in ${time}.`
         }
+        throw error
     }
-    throw error
 
-}
-
-return{
-    remainig: max - count,
-    limit: max
+    return{
+        remainig: max - count,
+        limit: max
+    }
 }
