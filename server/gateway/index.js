@@ -20,6 +20,10 @@ app.use(cors({
 app.use(cookieParser())
 app.use(morgan("dev"))
 
+app.get("/", (req, res) => {
+    res.status(200).send("Gateway is healthy");
+});
+
 app.use("/api/auth",proxy(process.env.AUTH_SERVICE))
 app.use("/api/chat",protect,proxyWithHeader(process.env.CHAT_SERVICE))
 app.use("/api/agent",protect,proxyWithHeader(process.env.AGENT_SERVICE))

@@ -1,5 +1,5 @@
 import { Code2, FileText, Globe, ImageIcon, MessageSquare, Mic, Paperclip, Presentation, Send, X, Zap} from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import sendMessage from '../features/sendMessage';
 import { useDispatch, useSelector } from 'react-redux';
 import {addMessage, setArtifacts, setIsLoading} from '../redux/messageSlice'
@@ -16,8 +16,66 @@ function ChatInput() {
   const [isSending,setIsSending] = useState(false)
   const {selectedConversation} = useSelector(state => state.conversation)
   const [selectedFile,setSelectedFile] = useState(null);
+  const [listening,setListening] = useState(false);
+  const [speechError,setSpeechError] = useState("");
+  const recognitionRef = useRef(null);
   const fileRef = useRef(null)
   const dispatch = useDispatch()
+  const speechSupported = typeof window !== "undefined" && Boolean(window.SpeechRecognition || window.webkitSpeechRecognition)
+
+  useEffect(()=>{
+    const SpeechRecognition = typeof window !== "undefined" && (window.SpeechRecognition || window.webkitSpeechRecognition)
+    if(!SpeechRecognition) return
+
+    const recognition = new SpeechRecognition()
+    recognition.lang="en-US"
+    recognition.interimResults=false
+    recognition.continuous=false
+    recognition.onresult=(event)=>{
+      const transcript = Array.from(event.results)
+        .slice(event.resultIndex)
+        .map((result)=>result[0]?.transcript || "")
+        .join(" ")
+        .trim()
+
+      if (transcript) {
+        setValue((currentValue)=>[currentValue.trim(),transcript].filter(Boolean).join(" "))
+      }
+    }
+    recognition.onerror=(event)=>{
+      setListening(false)
+      setSpeechError(`Speech recognition failed: ${event.error}.`)
+    }
+    recognition.onend=()=>setListening(false)
+    recognitionRef.current=recognition
+
+    return ()=>{
+      recognition.onresult=null
+      recognition.onerror=null
+      recognition.onend=null
+      recognition.abort()
+      recognitionRef.current=null
+    }
+  }, [])
+
+  const handleToggleListening = () => {
+    const recognition = recognitionRef.current
+    if (!recognition) return
+
+    setSpeechError("")
+    if (listening) {
+      recognition.stop()
+      setListening(false)
+      return
+    }
+
+    try {
+      recognition.start()
+      setListening(true)
+    } catch (error) {
+      setSpeechError(`Could not start speech recognition: ${error.message}`)
+    }
+  }
 
   const handleSendMessage = async () => {
     let conversation = selectedConversation
@@ -176,9 +234,22 @@ function ChatInput() {
                 <button className='flex items-center justify-center w-8 h-8 rounded-lg text-slate-600 hover:text-slate-400 hover:bg-white/5 border border-transparent hover:border-white/6 transition-all duration-150 bg-transparent cursor-pointer' onClick={()=>fileRef.current.click()}>
                     <Paperclip size={16}/>
                 </button>
-                <button className='flex items-center justify-center w-8 h-8 rounded-lg text-slate-600 hover:text-slate-400 hover:bg-white/5 border border-transparent hover:border-white/6 transition-all duration-150 bg-transparent cursor-pointer'>
+                <button
+                  type="button"
+                  onClick={handleToggleListening}
+                  disabled={!speechSupported || isSending}
+                  aria-label={listening ? "Stop speech recognition" : "Start speech recognition"}
+                  aria-pressed={listening}
+                  title={speechSupported ? (listening ? "Stop listening" : "Start voice input") : "Speech recognition is not supported"}
+                  className={`flex items-center justify-center w-8 h-8 rounded-lg border border-transparent transition-all duration-150 bg-transparent ${speechSupported && !isSending ? "text-slate-600 hover:text-slate-400 hover:bg-white/5 cursor-pointer" : "text-slate-700 cursor-not-allowed"} ${listening ? "text-red-400" : ""}`}
+                >
                     <Mic size={16}/>
                 </button>
+                {(listening || speechError || !speechSupported) && (
+                  <span role={speechError || !speechSupported ? "alert" : "status"} className={`text-xs ${speechError || !speechSupported ? "text-red-400" : "text-indigo-300"}`}>
+                    {speechError || (speechSupported ? "Listening..." : "Speech recognition is not supported in this browser.")}
+                  </span>
+                )}
             </div>
             <button disabled={!value.trim() || isSending} onClick={handleSendMessage} className='flex items-center justify-center w-8 h-8 rounded-lg border-none cursor-pointer transition-all duration-150 bg-linear-to-r from-indigo-500 to-violet-700 hover:opacity-90 text-white'>
               <Send size={15}/>
