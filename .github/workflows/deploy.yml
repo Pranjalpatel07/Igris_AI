@@ -11,7 +11,7 @@ env:
 
 jobs: 
   deploy-server:
-    runs_on: ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -21,7 +21,7 @@ jobs:
         with: 
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws.region: ${{ env.AWS_REGION }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to ECR
         id: login-ecr
@@ -99,73 +99,81 @@ jobs:
       - name: deploy gateway
         run: |
           aws ecs update-service \
-          --cluster ${{ secrects.ECS_CLUSTER }} \
-          --service ${{ secrects.GATEWAY_SERVICE}} \
+          --cluster ${{ secrets.ECS_CLUSTER }} \
+          --service ${{ secrets.GATEWAY_SERVICE }} \
           --force-new-deployment
       
 
       - name: deploy auth
         run: |
           aws ecs update-service \
-          --cluster ${{ secrects.ECS_CLUSTER }} \
-          --service ${{ secrects.AUTH_SERVICE}} \
+          --cluster ${{ secrets.ECS_CLUSTER }} \
+          --service ${{ secrets.AUTH_SERVICE }} \
           --force-new-deployment
       
 
       - name: deploy chat
         run: |
           aws ecs update-service \
-          --cluster ${{ secrects.ECS_CLUSTER }} \
-          --service ${{ secrects.CHAT_SERVICE}} \
+          --cluster ${{ secrets.ECS_CLUSTER }} \
+          --service ${{ secrets.CHAT_SERVICE }} \
           --force-new-deployment
 
 
       - name: deploy agent
         run: |
           aws ecs update-service \
-          --cluster ${{ secrects.ECS_CLUSTER }} \
-          --service ${{ secrects.AGENT_SERVICE}} \
+          --cluster ${{ secrets.ECS_CLUSTER }} \
+          --service ${{ secrets.AGENT_SERVICE }} \
           --force-new-deployment
 
 
       - name: deploy billing
         run: |
           aws ecs update-service \
-          --cluster ${{ secrects.ECS_CLUSTER }} \
-          --service ${{ secrects.BILLING_SERVICE}} \
+          --cluster ${{ secrets.ECS_CLUSTER }} \
+          --service ${{ secrets.BILLING_SERVICE }} \
           --force-new-deployment
       
 
   deploy-client:
     needs: deploy-server
-    runs_on: ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: build frontend
+      - name: Build client
+        working-directory: client
+        env:
+          VITE_SERVER_URL: ${{ vars.VITE_SERVER_URL }}
+          VITE_FIREBASE_API_KEY: ${{ vars.VITE_FIREBASE_API_KEY }}
+          VITE_RAZORPAY_KEY_ID: ${{ vars.VITE_RAZORPAY_KEY_ID }}
         run: |
-         cd frontend
-         npm install
-         npm run build
+          if [ -z "$VITE_SERVER_URL" ] || [ -z "$VITE_FIREBASE_API_KEY" ] || [ -z "$VITE_RAZORPAY_KEY_ID" ]; then
+            echo "Set VITE_SERVER_URL, VITE_FIREBASE_API_KEY, and VITE_RAZORPAY_KEY_ID as GitHub Actions variables."
+            exit 1
+          fi
+          npm ci
+          npm run build
 
       - name: aws configure
         uses: aws-actions/configure-aws-credentials@v4
         with: 
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws.region: ${{ env.AWS_REGION }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: upload to s3
         run: |
           aws s3 sync \
-          frontend/dist \
-          s3://${{secrects.s3_BUCKET}} \
+          client/dist \
+          s3://${{ secrets.S3_BUCKET }} \
           --delete
 
       - name: invalidate cloudfront
         run: |
           aws cloudfront create-invalidation \
           --distribution-id \
-          ${{secrects.CLOUDFRONT_DISTRIBUTION_ID}}
+          ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
           --path "/*"

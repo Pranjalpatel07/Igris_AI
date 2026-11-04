@@ -191,7 +191,7 @@ The current Compose file does not orchestrate these application containers; it o
 
 The agent service uses AWS S3 for generated-file storage and temporary download links. The GitHub Actions workflow at `.github/workflows/deploy.yml` describes an intended deployment on pushes to `main`: build and push backend images to Amazon ECR, update Amazon ECS services, then upload the client build to S3 and invalidate CloudFront.
 
-**Deployment status:** the checked-in workflow is not ready to run successfully as written. It contains invalid job keys (`runs_on`), misspelled `secrects` references, a frontend path that does not match this repository (`frontend` instead of `client`), and an incorrectly named AWS region input. Correct these items, configure the required GitHub Actions secrets and AWS resources, and test the workflow before relying on it for deployment. No AWS infrastructure is provisioned by this repository.
+Before running the workflow, configure these GitHub Actions secrets: `AWS_REGION`, `AWS_ACCOUNT_ID`, `AWS_ACCESS_KEY`, `AWS_SECRET_ACCESS_KEY`, `ECS_CLUSTER`, `GATEWAY_SERVICE`, `AUTH_SERVICE`, `CHAT_SERVICE`, `AGENT_SERVICE`, `BILLING_SERVICE`, `S3_BUCKET`, and `CLOUDFRONT_DISTRIBUTION_ID`. Also configure these repository variables for the client build: `VITE_SERVER_URL`, `VITE_FIREBASE_API_KEY`, and `VITE_RAZORPAY_KEY_ID`. The workflow validates that the client variables are present. Ensure the ECR repositories, ECS services, S3 bucket, and CloudFront distribution already exist. No AWS infrastructure is provisioned by this repository.
 
 ## 🧪 Available checks
 
