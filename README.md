@@ -99,7 +99,7 @@ Set the following values in the relevant backend service `.env` files:
 | `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_KEY`, `AWS_BUCKET_NAME` | Agent file storage in S3 |
 | `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET` | Billing service |
 
-The auth service imports its Firebase Admin service-account JSON from `server/services/auth/serviceAccountKey.json`. Supply this credential securely and do not commit service-account files or other secrets. Use separate credentials and appropriately restricted permissions outside local development.
+The auth service reads its Firebase Admin service-account JSON from `FIREBASE_SERVICE_ACCOUNT_JSON`, or falls back to `server/services/auth/serviceAccountKey.json` for local development. Never commit service-account files or other secrets.
 
 ### 2. Start Redis
 
@@ -192,6 +192,8 @@ The current Compose file does not orchestrate these application containers; it o
 The agent service uses AWS S3 for generated-file storage and temporary download links. The GitHub Actions workflow at `.github/workflows/deploy.yml` describes an intended deployment on pushes to `main`: build and push backend images to Amazon ECR, update Amazon ECS services, then upload the client build to S3 and invalidate CloudFront.
 
 Before running the workflow, configure these GitHub Actions secrets: `AWS_REGION`, `AWS_ACCOUNT_ID`, `AWS_ACCESS_KEY`, `AWS_SECRET_ACCESS_KEY`, `ECS_CLUSTER`, `GATEWAY_SERVICE`, `AUTH_SERVICE`, `CHAT_SERVICE`, `AGENT_SERVICE`, `BILLING_SERVICE`, `S3_BUCKET`, and `CLOUDFRONT_DISTRIBUTION_ID`. Also configure these repository variables for the client build: `VITE_SERVER_URL`, `VITE_FIREBASE_API_KEY`, and `VITE_RAZORPAY_KEY_ID`. The workflow validates that the client variables are present. Ensure the ECR repositories, ECS services, S3 bucket, and CloudFront distribution already exist. No AWS infrastructure is provisioned by this repository.
+
+For the auth ECS task, store the Firebase Admin service-account JSON as a Secrets Manager secret and add an ECS container `secrets` entry mapping the environment variable `FIREBASE_SERVICE_ACCOUNT_JSON` to that secret's ARN. The task execution role must be allowed to read the secret. Do not pass the credential as a Docker build argument or bake it into the image.
 
 ## 🧪 Available checks
 
