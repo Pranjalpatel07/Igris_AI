@@ -29,7 +29,8 @@ jobs:
 
       - name: Build Gateway
         run: |
-          docker build -f server/gateway/Dockerfile -t gateway server
+          test -f "$GITHUB_WORKSPACE/server/gateway/Dockerfile"
+          docker build --file "$GITHUB_WORKSPACE/server/gateway/Dockerfile" --tag gateway "$GITHUB_WORKSPACE/server"
         
       - name: tag Gateway
         run: |
@@ -43,7 +44,8 @@ jobs:
 
       - name: Build Auth
         run: |
-          docker build -f server/services/auth/Dockerfile -t auth-service server
+          test -f "$GITHUB_WORKSPACE/server/services/auth/Dockerfile"
+          docker build --file "$GITHUB_WORKSPACE/server/services/auth/Dockerfile" --tag auth-service "$GITHUB_WORKSPACE/server"
         
       - name: tag Auth
         run: |
@@ -57,7 +59,8 @@ jobs:
 
       - name: Build Chat
         run: |
-          docker build -f server/services/chat/Dockerfile -t chat-service server
+          test -f "$GITHUB_WORKSPACE/server/services/chat/Dockerfile"
+          docker build --file "$GITHUB_WORKSPACE/server/services/chat/Dockerfile" --tag chat-service "$GITHUB_WORKSPACE/server"
         
       - name: tag Chat
         run: |
@@ -71,7 +74,8 @@ jobs:
 
       - name: Build agent
         run: |
-          docker build -f server/services/agent/Dockerfile -t agent-service server
+          test -f "$GITHUB_WORKSPACE/server/services/agent/Dockerfile"
+          docker build --file "$GITHUB_WORKSPACE/server/services/agent/Dockerfile" --tag agent-service "$GITHUB_WORKSPACE/server"
         
       - name: tag agent
         run: |
@@ -85,7 +89,8 @@ jobs:
 
       - name: Build billing
         run: |
-          docker build -f server/services/billing/Dockerfile -t billing-service server
+          test -f "$GITHUB_WORKSPACE/server/services/billing/Dockerfile"
+          docker build --file "$GITHUB_WORKSPACE/server/services/billing/Dockerfile" --tag billing-service "$GITHUB_WORKSPACE/server"
         
       - name: tag billing
         run: |
