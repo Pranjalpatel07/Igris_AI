@@ -2,6 +2,12 @@
 
 IgrisAI is a chat-based AI workspace for conversation, coding assistance, web research, document analysis, and generated visual content. It combines a React client with a set of Express services and a LangChain/LangGraph agent workflow.
 
+Live link - https://d1mkasicsgyokj.cloudfront.net/
+
+<img width="1364" height="640" alt="Screenshot 2026-11-06 104132" src="https://github.com/user-attachments/assets/d957f7bd-d165-47e2-854a-494a02a93233" />
+
+<img width="1366" height="643" alt="Screenshot 2026-11-06 104202" src="https://github.com/user-attachments/assets/318f11a8-b344-4445-8672-e3e69e6e50e2" />
+
 ## ✨ Features
 
 - 💬 Google sign-in and saved conversations
